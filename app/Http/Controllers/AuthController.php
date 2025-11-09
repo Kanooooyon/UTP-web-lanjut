@@ -9,10 +9,11 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+
     public function showLoginForm()
     {
         if (Auth::check()) {
-            return redirect()->route('makanan.index');
+            return redirect()->route('dashboard');
         }
 
         return view('auth.login');
@@ -21,7 +22,7 @@ class AuthController extends Controller
     public function showRegisterForm()
     {
         if (Auth::check()) {
-            return redirect()->route('makanan.index');
+            return redirect()->route('dashboard');
         }
 
         return view('auth.register');
@@ -36,14 +37,14 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('makanan.index');
+
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
             'email' => 'Email atau password salah!',
         ]);
     }
-
     public function register(Request $request)
     {
         $request->validate([
@@ -60,7 +61,7 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('makanan.index');
+        return redirect()->route('dashboard');
     }
 
     public function logout(Request $request)
