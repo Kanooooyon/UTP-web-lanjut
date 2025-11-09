@@ -11,14 +11,27 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
+        if (Auth::check()) {
+            return redirect()->route('makanan.index');
+        }
+
         return view('auth.login');
+    }
+
+    public function showRegisterForm()
+    {
+        if (Auth::check()) {
+            return redirect()->route('makanan.index');
+        }
+
+        return view('auth.register');
     }
 
     public function login(Request $request)
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required'
+            'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials)) {
@@ -26,12 +39,9 @@ class AuthController extends Controller
             return redirect()->route('makanan.index');
         }
 
-        return back()->withErrors(['email' => 'Email atau password salah!']);
-    }
-
-    public function showRegisterForm()
-    {
-        return view('auth.register');
+        return back()->withErrors([
+            'email' => 'Email atau password salah!',
+        ]);
     }
 
     public function register(Request $request)
@@ -49,6 +59,7 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+
         return redirect()->route('makanan.index');
     }
 
@@ -57,6 +68,7 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect('/login');
     }
 }
