@@ -48,4 +48,47 @@ class BeratBadanController extends Controller
 
         return redirect()->route('beratbadan.index')->with('success', 'Catatan berat badan berhasil disimpan!');
     }
+
+    public function edit($id)
+    {
+        $berat = BeratBadan::where('user_id', Auth::id())->findOrFail($id);
+
+        // Dekripsi supaya bisa diedit
+        if ($berat->catatan) {
+            try {
+                $berat->catatan = Crypt::decryptString($berat->catatan);
+            } catch (\Exception $e) {
+                $berat->catatan = '';
+            }
+        }
+
+        return view('beratbadan.edit_berat', compact('berat'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'tanggal' => 'required|date',
+            'berat_badan' => 'required|numeric',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $berat = BeratBadan::where('user_id', Auth::id())->findOrFail($id);
+
+        $berat->update([
+            'tanggal' => $request->tanggal,
+            'berat_badan' => $request->berat_badan,
+            'catatan' => $request->catatan ? Crypt::encryptString($request->catatan) : null,
+        ]);
+
+        return redirect()->route('beratbadan.index')->with('success', 'Catatan berhasil diperbarui!');
+    }
+
+    public function destroy($id)
+    {
+        $berat = BeratBadan::where('user_id', Auth::id())->findOrFail($id);
+        $berat->delete();
+
+        return redirect()->route('beratbadan.index')->with('success', 'Catatan berhasil dihapus!');
+    }
 }
